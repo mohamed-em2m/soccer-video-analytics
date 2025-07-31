@@ -27,7 +27,7 @@ parser.add_argument(
     help="Path to the input video",
 )
 parser.add_argument(
-    "--ball_detection_model", default="models/ball.pt", type=str, help="Path to the model"
+    "--ball_detection_model", default=None, type=str, help="Path to the model"
 )
 parser.add_argument(
     "--player_detection_model", default=None, type=str, help="Path to the model"
@@ -73,7 +73,7 @@ fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
 # Object Detectors
 player_detector = YoloV5(args.player_detection_model) if args.player_detection_model else YoloV5()
-ball_detector = YoloV5(model_path=args.ball_detection_model)
+ball_detector = YoloV5(model_path=args.ball_detection_model) if args.ball_detection_model else YoloV5()
 
 # HSV Classifier
 hsv_classifier = HSVClassifier(filters=filters)
