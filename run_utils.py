@@ -142,7 +142,7 @@ def update_motion_estimator(
     return coord_transformations
 
 
-def get_main_ball(detections: List[Detection], match: Match = None) -> Ball:
+def get_main_ball(detections: List[Detection], match: Match = None, detection_label: str = "ball") -> Ball:
     """
     Gets the main ball from a list of balls detection
 
@@ -167,6 +167,10 @@ def get_main_ball(detections: List[Detection], match: Match = None) -> Ball:
         ball.set_color(match)
 
     if detections:
-        ball.detection = detections[0]
-
-    return ball
+            detected_balls = detections[detections["name"].str.lower().str.contains(detection_label)]
+            
+            if not detected_balls.empty:
+                ball.detection = detected_balls.loc[detected_balls["confidence"].idxmax()]
+            else:
+                ball.detection = detections.iloc[0] 
+    return ball 
