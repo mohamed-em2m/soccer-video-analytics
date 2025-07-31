@@ -10,7 +10,8 @@ from soccer import Ball, Match
 
 
 def get_ball_detections(
-    ball_detector: YoloV5, frame: np.ndarray
+    ball_detector: YoloV5, frame: np.ndarray,
+    detection_label: str = "ball"
 ) -> List[norfair.Detection]:
     """
     Uses custom Yolov5 detector in order
@@ -31,6 +32,12 @@ def get_ball_detections(
     """
     ball_df = ball_detector.predict(frame)
     ball_df = ball_df[ball_df["confidence"] > 0.3]
+           
+    ball_df = ball_df[ball_df.name.str.lower().str.contains(detection_label)]
+            
+    if not ball_df.empty:
+              ball_df = ball_df.loc[[ball_df["confidence"].idxmax()]]
+ 
     return Converter.DataFrame_to_Detections(ball_df)
 
 
@@ -142,7 +149,7 @@ def update_motion_estimator(
     return coord_transformations
 
 
-def get_main_ball(detections: List[Detection], match: Match = None, detection_label: str = "ball") -> Ball:
+def get_main_ball(detections: List[Detection], match: Match = None) -> Ball:
     """
     Gets the main ball from a list of balls detection
 
@@ -167,10 +174,6 @@ def get_main_ball(detections: List[Detection], match: Match = None, detection_la
         ball.set_color(match)
 
     if detections:
-            detected_balls = detections[detections["name"].str.lower().str.contains(detection_label)]
-            
-            if not detected_balls.empty:
-                ball.detection = detected_balls.loc[detected_balls["confidence"].idxmax()]
-            else:
-                ball.detection = detections.iloc[0] 
+        ball.detection = detections[0] 
+
     return ball 
