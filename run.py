@@ -27,7 +27,10 @@ parser.add_argument(
     help="Path to the input video",
 )
 parser.add_argument(
-    "--model", default="models/ball.pt", type=str, help="Path to the model"
+    "--ball_detection_model", default="models/ball.pt", type=str, help="Path to the model"
+)
+parser.add_argument(
+    "--player_detection_model", default=None, type=str, help="Path to the model"
 )
 parser.add_argument(
     "--passes",
@@ -39,7 +42,11 @@ parser.add_argument(
     action="store_true",
     help="Enable possession counter",
 )
-
+parser.add_argument(
+    "--detection_label",
+    default="ball",
+    help="set ball label in yolo",
+)
 parser.add_argument(
     "--first_team", default="Chelsea", type=str, help="First team Name"
 )
@@ -60,13 +67,13 @@ first_team       = args.first_team
 second_team      = args.second_team
 first_team_short  = args.first_team_short  or first_team[:3].upper()
 second_team_short = args.second_team_short or second_team[:3].upper()
-
+detection_label= args.detection_label
 video = Video(input_path=args.video)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
 # Object Detectors
-player_detector = YoloV5()
-ball_detector = YoloV5(model_path=args.model)
+player_detector = YoloV5(args.player_detection_model) if args.player_detection_model else YoloV5()
+ball_detector = YoloV5(model_path=args.ball_detection_model)
 
 # HSV Classifier
 hsv_classifier = HSVClassifier(filters=filters)
@@ -146,7 +153,7 @@ for i, frame in enumerate(video):
     )
 
     # Match update
-    ball = get_main_ball(ball_detections)
+    ball = get_main_ball(ball_detections,detection_label=detection_label)
     players = Player.from_detections(detections=players_detections, teams=teams)
     match.update(players, ball)
 
