@@ -10,7 +10,8 @@ from soccer import Ball, Match
 
 
 def get_ball_detections(
-    ball_detector: YoloV5, frame: np.ndarray
+    ball_detector: YoloV5, frame: np.ndarray,
+    detection_label: str = "ball"
 ) -> List[norfair.Detection]:
     """
     Uses custom Yolov5 detector in order
@@ -31,6 +32,12 @@ def get_ball_detections(
     """
     ball_df = ball_detector.predict(frame)
     ball_df = ball_df[ball_df["confidence"] > 0.3]
+           
+    ball_df = ball_df[ball_df.name.str.lower().str.contains(detection_label)]
+            
+    if not ball_df.empty:
+              ball_df = ball_df.loc[[ball_df["confidence"].idxmax()]]
+ 
     return Converter.DataFrame_to_Detections(ball_df)
 
 
@@ -166,7 +173,7 @@ def get_main_ball(detections: List[Detection], match: Match = None) -> Ball:
     if match:
         ball.set_color(match)
 
-    if detections:
-        ball.detection = detections[0]
 
-    return ball
+    ball.detection = detections[0] 
+
+    return ball 
