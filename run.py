@@ -39,7 +39,27 @@ parser.add_argument(
     action="store_true",
     help="Enable possession counter",
 )
+
+parser.add_argument(
+    "--first_team", default="Chelsea", type=str, help="First team Name"
+)
+parser.add_argument(
+    "--second_team", default="Man City", type=str, help="Second team Name"
+)
+parser.add_argument(
+    "--first_team_short", default=None, type=str, help="First team short name"
+)
+parser.add_argument(
+    "--second_team_short", default=None, type=str, help="Second team short name"
+)
 args = parser.parse_args()
+
+
+args = parser.parse_args()
+first_team       = args.first_team
+second_team      = args.second_team
+first_team_short  = args.first_team_short  or first_team[:3].upper()
+second_team_short = args.second_team_short or second_team[:3].upper()
 
 video = Video(input_path=args.video)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
@@ -56,13 +76,17 @@ classifier = InertiaClassifier(classifier=hsv_classifier, inertia=20)
 
 # Teams and Match
 chelsea = Team(
-    name="Chelsea",
-    abbreviation="CHE",
+    name=first_team,
+    abbreviation=first_team_short,
     color=(255, 0, 0),
     board_color=(244, 86, 64),
     text_color=(255, 255, 255),
 )
-man_city = Team(name="Man City", abbreviation="MNC", color=(240, 230, 188))
+man_city = Team(   
+                name=second_team,
+                abbreviation=second_team_short,
+                color=(240, 230, 188)
+)
 teams = [chelsea, man_city]
 match = Match(home=chelsea, away=man_city, fps=fps)
 match.team_possession = man_city
