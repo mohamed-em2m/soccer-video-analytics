@@ -1,9 +1,9 @@
-from math import sqrt
-from typing import List
-
+import PIL
 import norfair
 import numpy as np
-import PIL
+from math import sqrt
+from typing import List
+from PIL import Image, ImageDraw, ImageFont
 
 
 class Draw:
@@ -397,17 +397,22 @@ class Draw:
         draw = PIL.ImageDraw.Draw(img)
 
         if font is None:
-            font = PIL.ImageFont.truetype("fonts/Gidole-Regular.ttf", size=24)
+            font = ImageFont.truetype("fonts/Gidole-Regular.ttf", size=24)
 
-        w, h = draw.textsize(text, font=font)
+        # Measure text with textbbox
+        # bbox is (x0, y0, x1, y1)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+        # Calculate centered origin
         text_origin = (
-            origin[0] + width / 2 - w / 2,
-            origin[1] + height / 2 - h / 2,
+            origin[0] + (width - w) / 2,
+            origin[1] + (height - h) / 2,
         )
 
         draw.text(text_origin, text, font=font, fill=color)
-
         return img
+
 
     @staticmethod
     def add_alpha(img: PIL.Image.Image, alpha: int = 100) -> PIL.Image.Image:
