@@ -72,8 +72,8 @@ video = Video(input_path=args.video)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
 # Object Detectors
-player_detector = YoloV5(args.player_detection_model) if args.player_detection_model else YoloV5()
-ball_detector = YoloV5(model_path=args.ball_detection_model) if args.ball_detection_model else YoloV5()
+player_detector = YoloV5(model_path= args.player_detection_model ) if args.player_detection_model else YoloV5()
+ball_detector = YoloV5(model_path= args.ball_detection_model ) if args.ball_detection_model else YoloV5()
 
 # HSV Classifier
 hsv_classifier = HSVClassifier(filters=filters)
