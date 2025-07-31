@@ -126,7 +126,7 @@ for i, frame in enumerate(video):
 
     # Get Detections
     players_detections = get_player_detections(player_detector, frame)
-    ball_detections = get_ball_detections(ball_detector, frame)
+    ball_detections = get_ball_detections(ball_detector, frame, detection_label)
     detections = ball_detections + players_detections
 
     # Update trackers
@@ -153,7 +153,7 @@ for i, frame in enumerate(video):
     )
 
     # Match update
-    ball = get_main_ball(ball_detections,detection_label=detection_label)
+    ball = get_main_ball(ball_detections)
     players = Player.from_detections(detections=players_detections, teams=teams)
     match.update(players, ball)
 
