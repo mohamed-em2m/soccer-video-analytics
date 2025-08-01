@@ -1,13 +1,9 @@
 from typing import List
-from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
 from inference.base_detector import BaseDetector
 from ultralytics import YOLO
-
-def get_yolo_version_from_path(path):
-    return Path(path).stem
     
 class YoloV5(BaseDetector):
     def __init__(self, model_path: str = None, device: str = None):
