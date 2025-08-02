@@ -42,7 +42,8 @@ def get_ball_detections(
 
 
 def get_player_detections(
-    person_detector: YoloV5, frame: np.ndarray
+    person_detector: YoloV5, frame: np.ndarray ,
+    detection_label: str = "person"
 ) -> List[norfair.Detection]:
     """
     Uses YoloV5 Detector in order to detect the players
@@ -63,8 +64,10 @@ def get_player_detections(
     """
 
     person_df = person_detector.predict(frame)
-    person_df = person_df[person_df["name"] == "person"]
     person_df = person_df[person_df["confidence"] > 0.35]
+    person_df = person_df[person_df.name.str.lower().str.contains(detection_label)]        
+    if not person_df.empty:
+              person_df = person_df.loc[[person_df["confidence"].idxmax()]]
     person_detections = Converter.DataFrame_to_Detections(person_df)
     return person_detections
 
