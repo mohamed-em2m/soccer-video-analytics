@@ -69,8 +69,6 @@ def get_player_detections(
     if not person_df.empty :
              person_df = person_df[person_df.name.str.lower().str.contains(detection_label)]        
              person_df = person_df[person_df["confidence"] > 0.35]
-             if not person_df.empty:
-                 person_df = person_df.loc[[person_df["confidence"].idxmax()]]
     person_detections = Converter.DataFrame_to_Detections(person_df)
     return person_detections
 
