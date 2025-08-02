@@ -49,7 +49,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--player_label",
-    default="ball",
+    default="person",
     help="set player label in yolo model",
 )
 parser.add_argument(
