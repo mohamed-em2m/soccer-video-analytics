@@ -31,12 +31,13 @@ def get_ball_detections(
         List of ball detections
     """
     ball_df = ball_detector.predict(frame)
-    ball_df = ball_df[ball_df["confidence"] > 0.3]
            
-    ball_df = ball_df[ball_df.name.str.lower().str.contains(detection_label)]
             
     if not ball_df.empty:
-              ball_df = ball_df.loc[[ball_df["confidence"].idxmax()]]
+              ball_df = ball_df[ball_df.name.str.lower().str.contains(detection_label)]
+              ball_df = ball_df[ball_df["confidence"] > 0.3]
+              if not ball_df.empty:
+                  ball_df = ball_df.loc[[ball_df["confidence"].idxmax()]]
  
     return Converter.DataFrame_to_Detections(ball_df)
 
@@ -64,10 +65,12 @@ def get_player_detections(
     """
 
     person_df = person_detector.predict(frame)
-    person_df = person_df[person_df["confidence"] > 0.35]
-    person_df = person_df[person_df.name.str.lower().str.contains(detection_label)]        
-    if not person_df.empty:
-              person_df = person_df.loc[[person_df["confidence"].idxmax()]]
+    
+    if not person_df.empty :
+             person_df = person_df[person_df.name.str.lower().str.contains(detection_label)]        
+             person_df = person_df[person_df["confidence"] > 0.35]
+             if not person_df.empty:
+                 person_df = person_df.loc[[person_df["confidence"].idxmax()]]
     person_detections = Converter.DataFrame_to_Detections(person_df)
     return person_detections
 
