@@ -7,18 +7,18 @@ authors = ["Diego Marvid <dmarvid@tryolabs.com>", "Diego Fernandez <dfernandez@t
 [tool.poetry.dependencies]
 python = "^3.9"
 norfair = {git = "https://github.com/tryolabs/norfair.git", rev = "master"}
-torch = "^1.12.1"
+torch = "^1.8.0"
 opencv-python = "^4.6.0.66"
 numpy = "^1.23.4"
-Pillow = "^9.2.0"
+Pillow = "^11.3.0"
 matplotlib = "^3.6.1"
 pandas = "^1.5.0"
-torchvision = "^0.13.1"
+torchvision = "^0.9.0"
 PyYAML = "^6.0"
 tqdm = "^4.64.1"
 seaborn = "^0.12.0"
 ipython = "^8.5.0"
-
+ultralytics = "^8.3.172"
 [tool.poetry.dev-dependencies]
 
 [build-system]
