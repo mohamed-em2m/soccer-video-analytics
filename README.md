@@ -35,13 +35,20 @@ To run one of the applications (possession computation and passes counter) you n
 
 These flags are defined in the following table:
 
-| Argument | Description | Default value |
-| ----------- | ----------- | ----------- |
-| application | Set it to `possession` to run the possession counter or `passes` if you like to run the passes counter | None, but mandatory |
-| path-to-the-model | Path to the soccer ball model weights (`pt` format) | `/models/ball.pt` |
-| path-to-the-video | Path to the input video | `/videos/soccer_possession.mp4` |
+| Argument               | Description                                      | Default value                  |
+|------------------------|--------------------------------------------------|--------------------------------|
+| --video                | Path to the input video                          | videos/soccer_possession.mp4  |
+| --ball_detection_model | Path to the ball detection model (`.pt` format)  | None                           |
+| --player_detection_model | Path to the player detection model (`.pt` format) | None                           |
+| --passes               | Enable pass detection (flag)                     | False                          |
+| --possession           | Enable possession counter (flag)                 | False                          |
+| --ball_label           | Set ball label in YOLO model                     | ball                           |
+| --player_label         | Set player label in YOLO model                   | person                         |
+| --first_team           | First team name                                  | Chelsea                        |
+| --second_team          | Second team name                                 | Man City                       |
+| --first_team_short     | First team short name                            | None                           |
+| --second_team_short    | Second team short name                           | None                           |
 
-The following command shows you how to run this project.
 
 ```
 python run.py --<application> --model <path-to-the-model> --video <path-to-the-video>
