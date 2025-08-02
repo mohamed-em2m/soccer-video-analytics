@@ -43,7 +43,7 @@ parser.add_argument(
     help="Enable possession counter",
 )
 parser.add_argument(
-    "--detection_label",
+    "--ball_label",
     default="ball",
     help="set ball label in yolo",
 )
@@ -67,7 +67,7 @@ first_team       = args.first_team
 second_team      = args.second_team
 first_team_short  = args.first_team_short  or first_team[:3].upper()
 second_team_short = args.second_team_short or second_team[:3].upper()
-detection_label= args.detection_label
+ball_label = args.ball_label
 video = Video(input_path=args.video)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
@@ -126,7 +126,7 @@ for i, frame in enumerate(video):
 
     # Get Detections
     players_detections = get_player_detections(player_detector, frame)
-    ball_detections = get_ball_detections(ball_detector, frame, detection_label)
+    ball_detections = get_ball_detections(ball_detector, frame, ball_label)
     detections = ball_detections + players_detections
 
     # Update trackers
