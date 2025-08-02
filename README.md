@@ -59,7 +59,7 @@ python run.py --<application> --model <path-to-the-model> --video <path-to-the-v
 Here is an example on how to run the command:
     
 ```bash
-python run.py --possession --model models/ball.pt --video videos/soccer_possession.mp4
+python run.py --possession --ball_label models/ball.pt --video videos/soccer_possession.mp4
 ```
 
 An mp4 video will be generated after the execution. The name is the same as the input video with the suffix `_out` added.
