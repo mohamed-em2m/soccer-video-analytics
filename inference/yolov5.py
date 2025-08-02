@@ -62,4 +62,7 @@ class YoloV5(BaseDetector):
                         'name': class_name
                     })
         
-        return pd.DataFrame(detections)
+        if detections:
+            return pd.DataFrame(detections)
+        
+        return pd.DataFrame(columns=["xmin", "ymin", "xmax", "ymax", "confidence", "class", "name"])
