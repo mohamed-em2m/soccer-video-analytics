@@ -45,7 +45,12 @@ parser.add_argument(
 parser.add_argument(
     "--ball_label",
     default="ball",
-    help="set ball label in yolo",
+    help="set ball label in yolo model",
+)
+parser.add_argument(
+    "--player_label",
+    default="ball",
+    help="set player label in yolo model",
 )
 parser.add_argument(
     "--first_team", default="Chelsea", type=str, help="First team Name"
@@ -63,11 +68,15 @@ args = parser.parse_args()
 
 
 args = parser.parse_args()
+
 first_team       = args.first_team
 second_team      = args.second_team
 first_team_short  = args.first_team_short  or first_team[:3].upper()
 second_team_short = args.second_team_short or second_team[:3].upper()
+
+player_label = args.player_label
 ball_label = args.ball_label
+
 video = Video(input_path=args.video)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
@@ -125,7 +134,7 @@ passes_background = match.get_passes_background()
 for i, frame in enumerate(video):
 
     # Get Detections
-    players_detections = get_player_detections(player_detector, frame)
+    players_detections = get_player_detections(player_detector, frame, player_label)
     ball_detections = get_ball_detections(ball_detector, frame, ball_label)
     detections = ball_detections + players_detections
 
