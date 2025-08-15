@@ -26,6 +26,8 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--video", default="videos/soccer_possession.mp4", type=str,
                     help="Path to the input video")
+parser.add_argument("--output", default="output.mp4", type=str,
+                    help="Path to save the output video")
 parser.add_argument("--ball_detection_model", default=None, type=str,
                     help="Path to the YOLO model for ball detection")
 parser.add_argument("--player_detection_model", default=None, type=str,
@@ -84,7 +86,8 @@ ball_label = args.ball_label
 ball_confidence = args.ball_confidence
 player_confidence = args.player_confidence
 
-video = Video(input_path=args.video)
+# Video input & output
+video = Video(input_path=args.video, output_path=args.output)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
 
