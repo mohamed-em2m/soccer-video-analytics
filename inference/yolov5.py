@@ -26,7 +26,7 @@ class YoloV5(BaseDetector):
             print("Loading yolov5x model")
             self.model = YOLO("yolov5x.pt")
             
-    def predict(self, input_image: List[np.ndarray]) -> pd.DataFrame:
+    def predict(self, input_image: List[np.ndarray],image_size:int) -> pd.DataFrame:
         """
         Predicts the bounding boxes of the objects in the image
         Parameters
@@ -38,7 +38,7 @@ class YoloV5(BaseDetector):
         pd.DataFrame
             DataFrame containing the bounding boxes
         """
-        results = self.model(input_image, imgsz=640)
+        results = self.model(input_image, imgsz=image_size)
         
         # Convert ultralytics results to pandas DataFrame
         detections = []

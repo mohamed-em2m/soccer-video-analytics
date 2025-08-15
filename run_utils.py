@@ -11,7 +11,9 @@ from soccer import Ball, Match
 
 def get_ball_detections(
     ball_detector: YoloV5, frame: np.ndarray,
-    detection_label: str = "ball"
+    detection_label: str = "ball",
+    image_size: int = 1280,
+    confidence: float = .3
 ) -> List[norfair.Detection]:
     """
     Uses custom Yolov5 detector in order
@@ -30,12 +32,12 @@ def get_ball_detections(
     List[norfair.Detection]
         List of ball detections
     """
-    ball_df = ball_detector.predict(frame)
+    ball_df = ball_detector.predict(frame,image_size)
            
             
     if not ball_df.empty:
               ball_df = ball_df[ball_df.name.str.lower().str.contains(detection_label)]
-              ball_df = ball_df[ball_df["confidence"] > 0.3]
+              ball_df = ball_df[ball_df["confidence"] > confidence]
               if not ball_df.empty:
                   ball_df = ball_df.loc[[ball_df["confidence"].idxmax()]]
  
@@ -44,7 +46,9 @@ def get_ball_detections(
 
 def get_player_detections(
     person_detector: YoloV5, frame: np.ndarray ,
-    detection_label: str = "person"
+    detection_label: str = "person",
+    image_size: int = 1280,
+    confidence: float = .3
 ) -> List[norfair.Detection]:
     """
     Uses YoloV5 Detector in order to detect the players
@@ -64,11 +68,11 @@ def get_player_detections(
         List of player detections
     """
 
-    person_df = person_detector.predict(frame)
+    person_df = person_detector.predict(frame,image_size)
     
     if not person_df.empty :
              person_df = person_df[person_df.name.str.lower().str.contains(detection_label)]        
-             person_df = person_df[person_df["confidence"] > 0.35]
+             person_df = person_df[person_df["confidence"] > confidence]
     person_detections = Converter.DataFrame_to_Detections(person_df)
     return person_detections
 

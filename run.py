@@ -64,19 +64,28 @@ parser.add_argument(
 parser.add_argument(
     "--second_team_short", default=None, type=str, help="Second team short name"
 )
+parser.add_argument(
+    "--image_size", default=1280, type=int, help="Defualt size of images for prediction"
+)
+parser.add_argument(
+    "--player_confidence", default=.3, type=float, help="Defualt confidence threshold for players"
+)
+parser.add_argument(
+    "--ball_confidence", default=.3, type=float, help="Defualt  confidence threshold for balls"
+)
+
 args = parser.parse_args()
 
-
-args = parser.parse_args()
 
 first_team       = args.first_team
 second_team      = args.second_team
 first_team_short  = args.first_team_short  or first_team[:3].upper()
 second_team_short = args.second_team_short or second_team[:3].upper()
-
+image_size         = args.image_size 
 player_label = args.player_label
 ball_label = args.ball_label
-
+ball_confidence = args.ball_confidence
+player_confidence = args.player_confidence
 video = Video(input_path=args.video)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
@@ -134,8 +143,8 @@ passes_background = match.get_passes_background()
 for i, frame in enumerate(video):
 
     # Get Detections
-    players_detections = get_player_detections(player_detector, frame, player_label)
-    ball_detections = get_ball_detections(ball_detector, frame, ball_label)
+    players_detections = get_player_detections(player_detector, frame, player_label ,image_size, player_confidence)
+    ball_detections = get_ball_detections(ball_detector, frame, ball_label, image_size , ball_confidence)
     detections = ball_detections + players_detections
 
     # Update trackers
