@@ -97,6 +97,10 @@ second_team_short = args.second_team_short or second_team[:3].upper()
 first_team_color = tuple(map(int, args.first_team_color.split(',')))
 second_team_color = tuple(map(int, args.second_team_color.split(',')))
 
+# Debug: Print the colors being used
+print(f"First team ({first_team}) color: {first_team_color}")
+print(f"Second team ({second_team}) color: {second_team_color}")
+
 player_label = args.player_label
 ball_label = args.ball_label
 
@@ -183,6 +187,11 @@ for i, frame in enumerate(video):
         detections=player_detections,
         img=frame,
     )
+    
+    # Debug: Print classification results
+    if i % 30 == 0:  # Print every 30 frames to avoid spam
+        classified_count = sum(1 for det in player_detections if hasattr(det, 'team') and det.team is not None)
+        print(f"Frame {i}: {classified_count}/{len(player_detections)} players classified")
 
     # Match update
     ball = get_main_ball(ball_detections)
