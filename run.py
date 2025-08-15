@@ -363,43 +363,65 @@ def main():
             players = Player.from_detections(detections=player_detections, teams=teams)
             match.update(players, ball)
             
+            # Ensure frame is in correct format before drawing
+            if not isinstance(frame, np.ndarray):
+                frame = np.array(frame)
+            
+            # Ensure frame has correct shape (height, width, channels)
+            if len(frame.shape) != 3 or frame.shape[2] != 3:
+                if len(frame.shape) == 2:
+                    # Grayscale to RGB
+                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+                elif frame.shape[2] == 4:
+                    # RGBA to RGB
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
+            
             # Convert to PIL for drawing
-            frame = PIL.Image.fromarray(frame)
+            frame_pil = PIL.Image.fromarray(frame)
             
             # Draw possession features
             if args.possession:
-                frame = Player.draw_players(
-                    players=players, frame=frame, confidence=False, id=True
+                frame_pil = Player.draw_players(
+                    players=players, frame=frame_pil, confidence=False, id=True
                 )
                 
                 if ball and ball.detection:
-                    frame = path.draw(
-                        img=frame,
+                    frame_pil = path.draw(
+                        img=frame_pil,
                         detection=ball.detection,
                         coord_transformations=coord_transformations,
                         color=match.team_possession.color,
                     )
                 
-                frame = match.draw_possession_counter(
-                    frame, counter_background=possession_background, debug=args.debug
+                frame_pil = match.draw_possession_counter(
+                    frame_pil, counter_background=possession_background, debug=args.debug
                 )
                 
                 if ball:
-                    frame = ball.draw(frame)
+                    frame_pil = ball.draw(frame_pil)
             
             # Draw pass features
             if args.passes:
                 pass_list = match.passes
-                frame = Pass.draw_pass_list(
-                    img=frame, passes=pass_list, coord_transformations=coord_transformations
+                frame_pil = Pass.draw_pass_list(
+                    img=frame_pil, passes=pass_list, coord_transformations=coord_transformations
                 )
                 
-                frame = match.draw_passes_counter(
-                    frame, counter_background=passes_background, debug=args.debug
+                frame_pil = match.draw_passes_counter(
+                    frame_pil, counter_background=passes_background, debug=args.debug
                 )
             
-            # Convert back to numpy array
-            frame = np.array(frame)
+            # Convert back to numpy array with proper shape validation
+            frame = np.array(frame_pil)
+            
+            # Final shape validation before writing
+            if len(frame.shape) != 3:
+                print(f"Warning: Frame has unexpected shape {frame.shape}, skipping frame {frame_count}")
+                continue
+                
+            # Ensure proper data type
+            if frame.dtype != np.uint8:
+                frame = frame.astype(np.uint8)
             
             # Write frame to output video
             video.write(frame)
@@ -408,6 +430,10 @@ def main():
         print("\nProcessing interrupted by user")
     except Exception as e:
         print(f"Error during processing: {e}")
+        print(f"Error occurred at frame {frame_count}")
+        if args.debug:
+            import traceback
+            traceback.print_exc()
         raise
     finally:
         print(f"Processed {frame_count} frames")
