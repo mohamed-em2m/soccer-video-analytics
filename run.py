@@ -1,24 +1,4 @@
-%cd /kaggle/working/soccer-video-analytics/
-!python run.py \
-    --possession \
-    --video /kaggle/working/output.mp4 \
-    --ball_detection_model /kaggle/input/yolo11m-with-ball-label-only/football-tracker/yolov8s_run_1280px/weights/last.pt \
-    --player_detection_model /kaggle/input/train-yolo-to-track-the-ball/football-tracker/yolov8s_run_1280px/weights/best.pt \
-    --player_label player \
-    --ball_label ball \
-    --player_image_size 1280 \
-    --ball_image_size 1280 \
-    --player_confidence 0.3 \
-    --ball_confidence 0.0 \
-    --first_team Barcelona \
-    --second_team "Real Madrid" \
-    --first_team_short FCB \
-    --second_team_short RMD \
-    --first_team_color "255,0,0" \
-    --second_team_color "255,255,255" \
-
 import argparse
-
 import cv2
 import numpy as np
 import PIL
