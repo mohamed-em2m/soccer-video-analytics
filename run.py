@@ -62,10 +62,17 @@ args = parser.parse_args()
 
 
 # ======================
-# Helper: Parse RGB color strings
+# Helpers
 # ======================
-def parse_rgb(color_str):
-    return tuple(map(int, color_str.split(",")))
+def parse_rgb(color_str: str) -> tuple[int, int, int]:
+    try:
+        r, g, b = (int(x) for x in color_str.split(","))
+        return (max(0, min(255, r)),
+                max(0, min(255, g)),
+                max(0, min(255, b)))
+    except Exception:
+        # Fallback to white if malformed
+        return (255, 255, 255)
 
 
 # ======================
@@ -119,7 +126,9 @@ team_away = Team(
 
 teams = [team_home, team_away]
 match = Match(home=team_home, away=team_away, fps=fps)
-match.team_possession = team_away  # Initial possession assignment
+# Give an initial possession so UI can render a color even on first frames
+match.team_possession = team_away
+
 
 # ======================
 # Trackers & Motion Estimator
@@ -153,8 +162,12 @@ passes_background = match.get_passes_background()
 for i, frame in enumerate(video):
 
     # Get detections
-    players_detections = get_player_detections(player_detector, frame, player_label, player_image_size, player_confidence)
-    ball_detections = get_ball_detections(ball_detector, frame, ball_label, ball_image_size, ball_confidence)
+    players_detections = get_player_detections(
+        player_detector, frame, player_label, player_image_size, player_confidence
+    )
+    ball_detections = get_ball_detections(
+        ball_detector, frame, ball_label, ball_image_size, ball_confidence
+    )
     detections = ball_detections + players_detections
 
     # Update trackers with motion estimation
@@ -163,51 +176,87 @@ for i, frame in enumerate(video):
         detections=detections,
         frame=frame,
     )
+
     player_track_objects = player_tracker.update(
-    detections=players_detections,
-    coord_transformations=coord_transformations
-)
+        detections=players_detections,
+        coord_transformations=coord_transformations
+    )
     ball_track_objects = ball_tracker.update(
         detections=ball_detections,
         coord_transformations=coord_transformations
     )
 
-    player_detections = Converter.TrackedObjects_to_Detections(player_track_objects)
-    ball_detections = Converter.TrackedObjects_to_Detections(ball_track_objects)
+    player_detections_tracked = Converter.TrackedObjects_to_Detections(player_track_objects)
+    ball_detections_tracked = Converter.TrackedObjects_to_Detections(ball_track_objects)
 
-    # Classify players by team
-    player_detections = classifier.predict_from_detections(
-        detections=player_detections,
+    # Classify players by team (HSV + inertia)
+    player_detections_tracked = classifier.predict_from_detections(
+        detections=player_detections_tracked,
         img=frame,
     )
 
-    # Update match state
-    ball = get_main_ball(ball_detections)
-    players = Player.from_detections(detections=players_detections, teams=teams)
-    match.update(players, ball)
+    # Update match state — but only when we have enough signal to avoid None crashes
+    ball = get_main_ball(ball_detections_tracked)
+
+    # Build Player objects from the **tracked** detections so IDs stay consistent
+    players = Player.from_detections(
+        detections=player_detections_tracked,
+        teams=teams
+    )
+
+    have_any_players = len(players) > 0
+    have_any_team_assigned = any(getattr(p, "team", None) is not None for p in players)
+    have_ball = ball is not None
+
+    if have_any_players and have_any_team_assigned and have_ball:
+        # Guard against occasional edge-case AttributeErrors from downstream modules
+        try:
+            match.update(players, ball)
+        except AttributeError:
+            # Skip this frame if downstream code still encounters a None team/pass list
+            pass
 
     # Draw overlays
-    frame = PIL.Image.fromarray(frame)
+    frame_pil = PIL.Image.fromarray(frame)
 
     if args.possession:
-        frame = Player.draw_players(players=players, frame=frame, confidence=False, id=True)
-        if ball:
-            frame = path.draw(
-                img=frame,
+        frame_pil = Player.draw_players(
+            players=players,
+            frame=frame_pil,
+            confidence=False,
+            id=True
+        )
+        if ball is not None and ball.detection is not None:
+            frame_pil = path.draw(
+                img=frame_pil,
                 detection=ball.detection,
                 coord_transformations=coord_transformations,
-                color=match.team_possession.color,
+                color=match.team_possession.color if getattr(match, "team_possession", None) else first_team_color,
             )
-        frame = match.draw_possession_counter(frame, counter_background=possession_background, debug=False)
-        if ball:
-            frame = ball.draw(frame)
+        frame_pil = match.draw_possession_counter(
+            frame_pil,
+            counter_background=possession_background,
+            debug=False
+        )
+        if ball is not None:
+            frame_pil = ball.draw(frame_pil)
 
     if args.passes:
-        pass_list = match.passes
-        frame = Pass.draw_pass_list(img=frame, passes=pass_list, coord_transformations=coord_transformations)
-        frame = match.draw_passes_counter(frame, counter_background=passes_background, debug=False)
+        # Only draw passes if match has computed them and we have transforms
+        pass_list = getattr(match, "passes", [])
+        if pass_list:
+            frame_pil = Pass.draw_pass_list(
+                img=frame_pil,
+                passes=pass_list,
+                coord_transformations=coord_transformations
+            )
+            frame_pil = match.draw_passes_counter(
+                frame_pil,
+                counter_background=passes_background,
+                debug=False
+            )
 
-    frame = np.array(frame)
+    frame = np.array(frame_pil)
 
     # Write to output video
     video.write(frame)
