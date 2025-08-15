@@ -118,21 +118,21 @@ hsv_classifier = HSVClassifier(filters=filters)
 classifier = InertiaClassifier(classifier=hsv_classifier, inertia=20)
 
 # Teams and Match
-chelsea = Team(
+first_team = Team(
     name=first_team,
     abbreviation=first_team_short,
     color=first_team_color,
     board_color=(244, 86, 64),
     text_color=(255, 255, 255),
 )
-man_city = Team(   
+second_team = Team(   
                 name=second_team,
                 abbreviation=second_team_short,
                 color=second_team_color
 )
-teams = [chelsea, man_city]
-match = Match(home=chelsea, away=man_city, fps=fps)
-match.team_possession = man_city
+teams = [first_team, second_team]
+match = Match(home=first_team, away=second_team, fps=fps)
+match.team_possession = second_team
 
 # Tracking
 player_tracker = Tracker(
