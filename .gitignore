@@ -5,12 +5,7 @@ __pycache__/
 
 cenital/
 
-# Media
-*.mp4
-*.png
 
-# Models
-*.pt
 
 # C extensions
 *.so
