@@ -163,8 +163,14 @@ for i, frame in enumerate(video):
         detections=detections,
         frame=frame,
     )
-    player_track_objects = player_tracker.update(players_detections, coord_transformations)
-    ball_track_objects = ball_tracker.update(ball_detections, coord_transformations)
+    player_track_objects = player_tracker.update(
+    detections=players_detections,
+    coord_transformations=coord_transformations
+)
+    ball_track_objects = ball_tracker.update(
+        detections=ball_detections,
+        coord_transformations=coord_transformations
+    )
 
     player_detections = Converter.TrackedObjects_to_Detections(player_track_objects)
     ball_detections = Converter.TrackedObjects_to_Detections(ball_track_objects)
