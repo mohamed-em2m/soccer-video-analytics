@@ -88,33 +88,28 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-# FIXED: Use different variable names to avoid overwriting Team objects
-first_team_name = args.first_team
-second_team_name = args.second_team
-first_team_short = args.first_team_short or first_team_name[:3].upper()
-second_team_short = args.second_team_short or second_team_name[:3].upper()
+first_team       = args.first_team
+second_team      = args.second_team
+first_team_short  = args.first_team_short  or first_team[:3].upper()
+second_team_short = args.second_team_short or second_team[:3].upper()
 
 # Parse team colors
 first_team_color = tuple(map(int, args.first_team_color.split(',')))
 second_team_color = tuple(map(int, args.second_team_color.split(',')))
 
 # Debug: Print the colors being used
-print(f"First team ({first_team_name}) color: {first_team_color}")
-print(f"Second team ({second_team_name}) color: {second_team_color}")
+print(f"First team ({first_team}) color: {first_team_color}")
+print(f"Second team ({second_team}) color: {second_team_color}")
 
 player_label = args.player_label
 ball_label = args.ball_label
-player_image_size = args.player_image_size
-ball_image_size = args.ball_image_size
-player_confidence = args.player_confidence
-ball_confidence = args.ball_confidence
 
 video = Video(input_path=args.video, output_path=args.output)
 fps = video.video_capture.get(cv2.CAP_PROP_FPS)
 
 # Object Detectors
-player_detector = YoloV5(model_path=args.player_detection_model) if args.player_detection_model else YoloV5()
-ball_detector = YoloV5(model_path=args.ball_detection_model) if args.ball_detection_model else YoloV5()
+player_detector = YoloV5(model_path= args.player_detection_model ) if args.player_detection_model else YoloV5()
+ball_detector = YoloV5(model_path= args.ball_detection_model ) if args.ball_detection_model else YoloV5()
 
 # HSV Classifier
 hsv_classifier = HSVClassifier(filters=filters)
@@ -122,26 +117,24 @@ hsv_classifier = HSVClassifier(filters=filters)
 # Add inertia to classifier
 classifier = InertiaClassifier(classifier=hsv_classifier, inertia=20)
 
-# FIXED: Create Team objects with proper variable names
-team1 = Team(
-    name=first_team_name,
+# Teams and Match
+first_team = Team(
+    name=first_team,
     abbreviation=first_team_short,
     color=first_team_color,
     board_color=(int(first_team_color[0]*0.8), int(first_team_color[1]*0.8), int(first_team_color[2]*0.8)),  # Darker version
     text_color=(255, 255, 255),
 )
-
-team2 = Team(   
-    name=second_team_name,
-    abbreviation=second_team_short,
-    color=second_team_color,
-    board_color=(int(second_team_color[0]*0.8), int(second_team_color[1]*0.8), int(second_team_color[2]*0.8)),  # Darker version
-    text_color=(255, 255, 255),
+second_team = Team(   
+                name=second_team,
+                abbreviation=second_team_short,
+                color=second_team_color,
+                board_color=(int(second_team_color[0]*0.8), int(second_team_color[1]*0.8), int(second_team_color[2]*0.8)),  # Darker version
+                text_color=(255, 255, 255),
 )
-
-teams = [team1, team2]
-match = Match(home=team1, away=team2, fps=fps)
-match.team_possession = team2
+teams = [first_team, second_team]
+match = Match(home=first_team, away=second_team, fps=fps)
+match.team_possession = second_team
 
 # Tracking
 player_tracker = Tracker(
@@ -169,23 +162,9 @@ passes_background = match.get_passes_background()
 
 for i, frame in enumerate(video):
 
-    # FIXED: Pass all required parameters to detection functions
-    players_detections = get_player_detections(
-        player_detector, 
-        frame, 
-        player_label, 
-        player_image_size, 
-        player_confidence
-    )
-    
-    ball_detections = get_ball_detections(
-        ball_detector, 
-        frame, 
-        ball_label, 
-        ball_image_size, 
-        ball_confidence
-    )
-    
+    # Get Detections
+    players_detections = get_player_detections(player_detector, frame, player_label)
+    ball_detections = get_ball_detections(ball_detector, frame, ball_label)
     detections = ball_detections + players_detections
 
     # Update trackers
@@ -206,7 +185,6 @@ for i, frame in enumerate(video):
     player_detections = Converter.TrackedObjects_to_Detections(player_track_objects)
     ball_detections = Converter.TrackedObjects_to_Detections(ball_track_objects)
 
-    # FIXED: Use the correct variable name for player detections in classification
     player_detections = classifier.predict_from_detections(
         detections=player_detections,
         img=frame,
@@ -216,16 +194,10 @@ for i, frame in enumerate(video):
     if i % 30 == 0:  # Print every 30 frames to avoid spam
         classified_count = sum(1 for det in player_detections if hasattr(det, 'team') and det.team is not None)
         print(f"Frame {i}: {classified_count}/{len(player_detections)} players classified")
-        
-        # Additional debug: Print team assignments
-        for j, det in enumerate(player_detections):
-            if hasattr(det, 'team') and det.team is not None:
-                print(f"  Player {j}: Team {det.team.name} (Color: {det.team.color})")
 
     # Match update
     ball = get_main_ball(ball_detections)
-    # FIXED: Use player_detections (classified) instead of players_detections (raw)
-    players = Player.from_detections(detections=player_detections, teams=teams)
+    players = Player.from_detections(detections=players_detections, teams=teams)
     
     # Handle potential AttributeError in match.update
     try:
@@ -247,14 +219,12 @@ for i, frame in enumerate(video):
             players=players, frame=frame, confidence=False, id=True
         )
 
-        # FIXED: Add safety check for ball.detection
-        if ball and hasattr(ball, 'detection') and ball.detection is not None:
-            frame = path.draw(
-                img=frame,
-                detection=ball.detection,
-                coord_transformations=coord_transformations,
-                color=match.team_possession.color,
-            )
+        frame = path.draw(
+            img=frame,
+            detection=ball.detection,
+            coord_transformations=coord_transformations,
+            color=match.team_possession.color,
+        )
 
         frame = match.draw_possession_counter(
             frame, counter_background=possession_background, debug=False
