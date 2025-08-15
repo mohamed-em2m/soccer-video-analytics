@@ -1,4 +1,24 @@
+%cd /kaggle/working/soccer-video-analytics/
+!python run.py \
+    --possession \
+    --video /kaggle/working/output.mp4 \
+    --ball_detection_model /kaggle/input/yolo11m-with-ball-label-only/football-tracker/yolov8s_run_1280px/weights/last.pt \
+    --player_detection_model /kaggle/input/train-yolo-to-track-the-ball/football-tracker/yolov8s_run_1280px/weights/best.pt \
+    --player_label player \
+    --ball_label ball \
+    --player_image_size 1280 \
+    --ball_image_size 1280 \
+    --player_confidence 0.3 \
+    --ball_confidence 0.0 \
+    --first_team Barcelona \
+    --second_team "Real Madrid" \
+    --first_team_short FCB \
+    --second_team_short RMD \
+    --first_team_color "255,0,0" \
+    --second_team_color "255,255,255" \
+
 import argparse
+
 import cv2
 import numpy as np
 import PIL
@@ -186,7 +206,18 @@ for i, frame in enumerate(video):
     # Match update
     ball = get_main_ball(ball_detections)
     players = Player.from_detections(detections=players_detections, teams=teams)
-    match.update(players, ball)
+    
+    # Handle potential AttributeError in match.update
+    try:
+        match.update(players, ball)
+    except AttributeError as e:
+        if "'NoneType' object has no attribute 'passes'" in str(e):
+            print(f"Warning: Skipping pass detection for frame {i} due to team identification issue")
+            # Continue processing without crashing
+            pass
+        else:
+            # Re-raise if it's a different AttributeError
+            raise
 
     # Draw
     frame = PIL.Image.fromarray(frame)
