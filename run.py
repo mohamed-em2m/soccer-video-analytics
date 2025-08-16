@@ -15,6 +15,7 @@ from run_utils import (
     get_player_detections,
     update_motion_estimator,
 )
+
 from soccer import Match, Player, Team
 from soccer.draw import AbsolutePath
 from soccer.pass_event import Pass
