@@ -6,6 +6,7 @@ from norfair import Tracker, Video
 from norfair.camera_motion import MotionEstimator
 from norfair.distances import mean_euclidean
 
+
 from inference import Converter, HSVClassifier, InertiaClassifier, YoloV5
 from inference.filters import make_team_filter  # we will build referee via this too
 from run_utils import (
