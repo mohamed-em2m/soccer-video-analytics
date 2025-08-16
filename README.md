@@ -8,6 +8,18 @@ This repository contains the companion code for automated soccer video analysis,
 
 The system uses YOLO object detection models to identify players and balls, HSV-based jersey classification for team assignment, and advanced tracking algorithms to analyze game dynamics in real-time.
 
+## Contributors
+
+**Mohamed Emam** - Enhanced the original implementation with significant improvements:
+- **add trained model**: Adding models for detecting the ball and players
+- **Custom model support**: Added compatibility for custom-trained ball and player detection models
+- **Flexible label configuration**: Implemented support for different YOLO model labels (not limited to default "ball" and "person")
+- **Enhanced color customization**: Added comprehensive team color configuration for UI elements and rectangles
+- **Improved video compatibility**: Added arguments for different image sizes, confidence thresholds, and model paths to work with any video
+- **Robust model integration**: Fixed compatibility issues with newer YOLO model versions
+
+*Based on the original work by [Tryolabs](https://tryolabs.com) from their blog post [Automatically measuring soccer ball possession with AI and video analytics](https://tryolabs.com/blog/2022/10/17/measuring-soccer-ball-possession-ai-video-analytics).*
+
 ## Features
 
 - **Ball possession tracking** with visual possession counter
@@ -16,6 +28,9 @@ The system uses YOLO object detection models to identify players and balls, HSV-
 - **Multi-object tracking** with motion compensation
 - **Customizable team colors and names** for display
 - **Flexible model configuration** for different detection scenarios
+- **Custom model support** for both ball and player detection
+- **Configurable YOLO labels** for different trained models
+- **Enhanced video compatibility** with adjustable parameters
 
 ## Installation
 
@@ -58,8 +73,8 @@ First, make sure to initialize your environment using `poetry shell`.
 | `--second_team`            | Second team name                                   | `Man City`                    |
 | `--first_team_short`       | First team short name (auto-generated if not set) | `None`                        |
 | `--second_team_short`      | Second team short name (auto-generated if not set)| `None`                        |
-| `--first_team_color`       | First team color name in RGB format (comma-separated)  | `255,0,0`                     |
-| `--second_team_color`      | Second team color name in RGB format (comma-separated) | `240,230,188`                 |
+| `--first_team_color_text`       | First team color in RGB format (comma-separated)  | `255,0,0`                     |
+| `--second_team_color_text`      | Second team color in RGB format (comma-separated) | `240,230,188`                 |
 | `--first_jesry_color`      | First team jersey color name for classification   | `blue`                        |
 | `--second_jesry_color`     | Second team jersey color name for classification  | `white`                       |
 | `--output`                 | Path to the output video file                      | `output_video.mp4`            |
