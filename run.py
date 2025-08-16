@@ -78,10 +78,10 @@ parser.add_argument(
     "--second_team_short", default=None, type=str, help="Second team short name"
 )
 parser.add_argument(
-    "--first_team_color_text", default="255,0,0", type=str, help="First team color in RGB format (comma-separated)"
+    "--first_team_color_text", default="255,0,0", type=str, help="First team color in RGB format (comma-separated) for text color"
 )
 parser.add_argument(
-    "--second_team_color_text", default="240,230,188", type=str, help="Second team color in RGB format (comma-separated)"
+    "--second_team_color_text", default="240,230,188", type=str, help="Second team color in RGB format (comma-separated) for text color"
 )
 parser.add_argument( 
     "--first_jesry_color", default="blue", type=str, help="first team jersey color name this is imprortant for correct color of recentagle"
